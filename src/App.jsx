@@ -1,5 +1,5 @@
 import "./App.css";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import "react-phone-number-input/style.css";
@@ -44,119 +44,108 @@ import EmployerEditJob from "./pages/Employer/EmployerJob/EmployerEditJob";
 import EmployerProfessionalDetail from "./pages/Employer/EmployerProfessionalDetail";
 import AdminEmployerDetail from "./components/AdminEmployerTabs/AdminEmployerDetail";
 import { toast } from "react-toastify";
+
 function App() {
   const navigate = useNavigate();
   const user = useSelector(selectUser);
   const dispatch = useDispatch();
-  console.log(user, encryptKey, "this is user data for store user data");
 
   useEffect(() => {
-    if (user) {
-      setAuthToken(user?.access);
-      if (window.location.pathname === "/") {
-        if (user?.profile_completed) {
-          if (user.type === "P") {
-            navigate("/find-employee/job");
-          } else if (user.type === "F") {
-            navigate("/employer/dashboard");
-          } else {
-            navigate("/admin/dashboard");
-          }
-        } else {
-          if (user) {
-            navigate("/create-profile");
-          }
-        }
-      }
-    } else {
+    const initializeAuth = () => {
       const storedData = localStorage.getItem("USER_STRING");
       if (storedData) {
-        const data = JSON.parse(storedData);
-        const adminData = decryptUserData(data, encryptKey);
-        console.log(adminData, "this is adminData of user");
-        setAuthToken(adminData?.access);
-        dispatch(addUser(adminData));
-        if (window.location.pathname === "/") {
-          if (user && user?.profile_completed) {
-            if (user.type === "P") {
-              navigate("/find-employee/job");
-            } else if (user.type === "F") {
-              navigate("/employer/dashboard");
-            } else {
-              navigate("/admin/dashboard");
-            }
-          } else {
-            if (user) {
-              navigate("/create-profile");
-            }
-          }
-        }
-      } else {
-        localStorage.removeItem("USER_STRING");
-        if (window.location.pathname !== "/") {
-          window.location.href = "/";
+        try {
+          const data = JSON.parse(storedData);
+          const adminData = decryptUserData(data, encryptKey);
+          setAuthToken(adminData?.access);
+          dispatch(addUser(adminData));
+        } catch (error) {
+          console.error("Error decrypting user data:", error);
+          localStorage.removeItem("USER_STRING");
+          navigate("/");
         }
       }
+    };
+
+    initializeAuth();
+  }, [dispatch, navigate]);
+
+  const ProtectedRoute = ({ children, allowedTypes }) => {
+    if (!user) {
+      return <Navigate to="/" replace />;
     }
-  }, [user, dispatch]);
+
+    if (allowedTypes && !allowedTypes.includes(user.type)) {
+      return <Navigate to="/" replace />;
+    }
+
+    return children;
+  };
 
   return (
     <Routes>
       <Route path="/" element={<SignIn />} />
       <Route path="/sign-up" element={<SignUp />} />
-      <Route path="/create-profile" element={<CreateProfile />} />
       <Route path="/forget-email" element={<ForgetEmail />} />
       <Route path="/changepassword" element={<ChangePassword />} />
       <Route path="/otpset/:id" element={<OtpSet />} />
-      {user?.type === "P" && (
-        <Route element={<Navbar />}>
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/find-employee/job" element={<EmployeeJob />} />
-          <Route
-            path="/find-employee/job/detail/:id"
-            element={<EmployeeeJobDetail />}
-          />
-          <Route path="/employee/job/" element={<EmployeeJobs />} />
-          <Route path="/job-details/:id" element={<JobDetails />} />
-        </Route>
-      )}
+      
+      <Route
+        path="/create-profile"
+        element={
+          <ProtectedRoute>
+            <CreateProfile />
+          </ProtectedRoute>
+        }
+      />
 
-      {/* employer routes */}
+      {/* Professional Routes */}
+      <Route
+        element={
+          <ProtectedRoute allowedTypes={["P"]}>
+            <Navbar />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/find-employee/job" element={<EmployeeJob />} />
+        <Route path="/find-employee/job/detail/:id" element={<EmployeeeJobDetail />} />
+        <Route path="/employee/job/" element={<EmployeeJobs />} />
+        <Route path="/job-details/:id" element={<JobDetails />} />
+      </Route>
 
-      <Route element={<Dashboardnav type={"employer"} />}>
+      {/* Employer Routes */}
+      <Route
+        element={
+          <ProtectedRoute allowedTypes={["F"]}>
+            <Dashboardnav type="employer" />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/employer/dashboard" element={<EmployerDashboard />} />
-        <Route
-          path="/employer/professional/:id"
-          element={<EmployerProfessionalDetail />}
-        />
-
+        <Route path="/employer/professional/:id" element={<EmployerProfessionalDetail />} />
         <Route path="/employer/jobs" element={<EmployerJobs />} />
         <Route path="/employer/jobs/:id" element={<EmployerJobDetail />} />
         <Route path="/employer/jobs/postjob" element={<EmployerPostJob />} />
         <Route path="/employer/jobs/editjob" element={<EmployerEditJob />} />
         <Route path="/employer/applicants" element={<EmployerApplicants />} />
-        <Route
-          path="/employer/applicants/:id"
-          element={<EmployerApplicantDetail />}
-        />
+        <Route path="/employer/applicants/:id" element={<EmployerApplicantDetail />} />
         <Route path="/employer/messages" element={<EmployerMessages />} />
-        <Route
-          path="/employer/messages/:id"
-          element={<EmployerMessageDetail />}
-        />
+        <Route path="/employer/messages/:id" element={<EmployerMessageDetail />} />
         <Route path="/employer/settings" element={<EmployerSetting />} />
       </Route>
-      {/* admin routes */}
-      <Route element={<Dashboardnav type={"admin"} />}>
+
+      {/* Admin Routes */}
+      <Route
+        element={
+          <ProtectedRoute allowedTypes={["A"]}>
+            <Dashboardnav type="admin" />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route
-          path="/admin/healthcareprofesionals"
-          element={<AdminHealthCareProfesionals />}
-        />
-        <Route
-          path="/admin/healthcareprofesionals/:id"
-          element={<AdminHealthCareProfesionalDetail />}
-        />
+        <Route path="/admin/healthcareprofesionals" element={<AdminHealthCareProfesionals />} />
+        <Route path="/admin/healthcareprofesionals/:id" element={<AdminHealthCareProfesionalDetail />} />
         <Route path="/admin/employer" element={<AdminEmployers />} />
         <Route path="/admin/employer/:id" element={<AdminEmployerDetail />} />
         <Route path="/admin/jobs" element={<AdminJobs />} />
@@ -165,6 +154,9 @@ function App() {
         <Route path="/admin/messages/:id" element={<AdminMessageDetail />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
       </Route>
+
+      {/* Catch all route */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
