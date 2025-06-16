@@ -20,7 +20,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { FaCaretDown, FaCaretRight } from "react-icons/fa"; // For dropdown indicators
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useMediaQuery } from "@mui/material";
-import { LuUser2 } from "react-icons/lu";
+import { FaUser } from "react-icons/fa";
 import { removeAuthToken } from "../api/apiClient";
 
 const drawerWidthExpanded = 250;
@@ -56,7 +56,7 @@ function SideNav({
         },
         {
           label: "Users",
-          icon: <LuUser2 />,
+          icon: <FaUser />,
           children: [
             {
               label: "Healthcare Professionals",

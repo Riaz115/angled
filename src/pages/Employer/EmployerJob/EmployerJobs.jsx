@@ -332,14 +332,13 @@ const EmployerJobs = () => {
                       <Tooltip title={job.location} arrow>
                         <Typography
                           sx={{
-                            display: "block",
                             maxWidth: "200px",
                             whiteSpace: "normal",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             WebkitBoxOrient: "vertical",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2, // Limits text to two lines
+                            WebkitLineClamp: 2,
+                            display: "-webkit-box"
                           }}
                         >
                           {job.location}
