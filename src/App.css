@@ -1,0 +1,171 @@
+@font-face {
+  font-family: 'Good Times';
+  src: url('./assets/fonts/goodTimes.woff2') format('woff2'),
+       url('./assets/fonts/goodTimes.woff') format('woff'),
+       url('./assets/fonts/goodTimes.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* *{
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+} */
+p{
+  margin-bottom: 0 !important;
+}
+.good-times-font {
+  font-family: 'Good Times', sans-serif  !important;
+}
+.borwntext{
+  color: #767F8C;
+  font-size: 12px;
+}
+.imageblur{
+  filter: blur(5px);
+}
+
+.bg_primary{
+  background-color: #000e2f;
+}
+
+.text_primary{
+  color: #000e2f;
+}
+
+.text_golden{
+  color:#ae914d;
+}
+
+.bg_gray{
+background-color: #f1f1f1;
+}
+
+.text_gray{
+color:#7b7b7b;
+}
+
+.bg_blue{
+  background-color: #004fff;
+}
+
+.text_blue{
+  color:#004fff;
+}
+.cursor_pointer{
+  cursor: pointer !important;
+}
+.leftSignup::-webkit-scrollbar{
+  width: 0 !important;
+}
+
+
+
+
+
+
+.cardElevation {
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1) !important;
+}
+.pp{
+  z-index: 999999 !important;
+}
+.org_bg{
+  background-color: #E4812E !important;
+}
+#togglePassword{
+  cursor: pointer;
+  right: 10px;
+  top: 67%;
+
+}
+.auth_input{
+  background-color: #000e2f;
+  color: white;
+  border: 1px solid white;
+  width:100%
+}
+.auth_input .PhoneInputInput {
+  background-color: #000e2f !important; 
+  color: white !important;            
+  border: none !important;           
+}
+
+
+.auth_input .PhoneInputInput:focus {
+  outline: none !important;
+  box-shadow: none !important; 
+  border: none !important;    
+}
+
+
+.auth_input .PhoneInputInput::placeholder {
+  color: #7E7E7E !important;
+}
+
+.test{
+  border:red 1px solid;
+}
+
+.filterRightBorder{
+  border-right: 1px solid #9199a3;
+} 
+.fontstyleText {
+  font-size: 16px !important;
+  font-family: 'Poppins', sans-serif !important; /* Ensure 'Poppins' is loaded */
+  font-weight: 400 !important; /* Correct usage for font-weight */
+  color:#505050 !important;
+}
+
+.fontstylelabel{
+
+  font-size: 18px !important;
+  font-family: 'Poppins', sans-serif !important;
+  font: 500 !important;
+  color: 'black' !important;
+}
+
+@media (max-width: 1400px) {
+  .filterRightBorder{
+    border-right: none;
+  } 
+}
+
+
+.auth_input1{
+  background-color: #fefeff;
+  color: rgb(10, 1, 1);
+  border: 1px solid rgb(220, 219, 219);
+  width:100%
+}
+.auth_input1 .PhoneInputInput {
+  background-color: #fefeff !important; 
+  color: rgb(9, 0, 0) !important;            
+  border: none !important;           
+}
+
+
+.auth_input1 .PhoneInputInput:focus {
+  outline: none !important;
+  box-shadow: none !important; 
+  border: none !important;    
+}
+
+
+.auth_input1 .PhoneInputInput::placeholder {
+  color: #7E7E7E !important;
+}
+
+.cursor-pointer { cursor: pointer; }
+.modal-backdrop{
+  z-index: 900 !important;
+}
+
+.autocomplete-container {
+  position: relative;
+  z-index: 1050; /* Adjust to a value higher than the modal's z-index */
+}
+.pac-container {
+  z-index: 9999 !important; /* Ensure the dropdown stays on top */
+}
