@@ -1,5 +1,5 @@
 import { Box, Typography, Button, Alert } from "@mui/material";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "react-phone-number-input/style.css";
 import ForgetPasswordModal from "../modals/ForgetPasswordModal";
@@ -26,6 +26,12 @@ const SignIn = () => {
   const [showWrongCredentialsModal, setshowWrongCredentialsModal] =
     useState(false);
   const dispatch = useDispatch();
+
+  // Add debugging to check if component is rendering
+  useEffect(() => {
+    console.log("SignIn component mounted");
+    console.log("API Base URL:", import.meta.env.VITE_API_URL);
+  }, []);
 
   const handleSignIn = async () => {
     // Reset errors
@@ -121,6 +127,19 @@ const SignIn = () => {
 
   return (
     <Box className="d-flex flex-row w-100" sx={{ height: "100vh" }}>
+      {/* Debug test div */}
+      <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        background: 'red', 
+        color: 'white', 
+        padding: '10px', 
+        zIndex: 9999 
+      }}>
+        SignIn Component is rendering!
+      </div>
+      
       <ForgetPasswordModal
         show={showForgetPasswordModal}
         onHide={() => setshowForgetPasswordModal(false)}
@@ -136,7 +155,7 @@ const SignIn = () => {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          backgroundImage: "url('../../public/signatureBG.svg')",
+          backgroundImage: "url('/signatureBG.svg')",
           backgroundPosition: "center bottom 50px",
           backgroundRepeat: "no-repeat",
           height: "100%",
@@ -161,7 +180,7 @@ const SignIn = () => {
             className="d-flex flex-column align-items-center gap-3"
           >
             <Box className="text-center mt-3 mb-4">
-              <img src="/signUpLogo.svg" alt="" className="img-fluid" />
+              <img src="/signUpLogo.svg" alt="Logo" className="img-fluid" />
             </Box>
             <Typography className="text-white fw-bold good-times-font fs-4">
               Sign In
@@ -284,7 +303,7 @@ const SignIn = () => {
       <Box sx={{ height: "auto" }} className="w-100 d-md-block d-none p-0">
         <img
           src="/signUpDoctor.svg"
-          alt=""
+          alt="Doctor"
           style={{
             width: "100%",
             height: "100%",

@@ -50,6 +50,13 @@ function App() {
   const user = useSelector(selectUser);
   const dispatch = useDispatch();
 
+  // Add debugging to check if App component is rendering
+  useEffect(() => {
+    console.log("App component mounted");
+    console.log("Current user:", user);
+    console.log("Environment:", import.meta.env.MODE);
+  }, [user]);
+
   useEffect(() => {
     const initializeAuth = () => {
       const storedData = localStorage.getItem("USER_STRING");
