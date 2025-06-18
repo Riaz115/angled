@@ -1,148 +1,319 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Box, Typography, Button, Alert } from "@mui/material";
+import "react-phone-number-input/style.css";
+import ForgetPasswordModal from "../modals/ForgetPasswordModal";
+import WrongCredentialsModal from "../modals/WrongCredentialsModal";
+import { IoEyeSharp } from "react-icons/io5";
+import { IoMdEyeOff } from "react-icons/io";
+import apiClient from "../api/apiClient";
+import { Loader } from "../components/Loader/loader";
+import { toast } from "react-toastify";
+import { encryptUserData } from "../api/reuse";
+import { encryptKey } from "../config";
+import { addUser } from "../redux/userSlice";
+import { useDispatch } from "react-redux";
 
 const SignIn = () => {
+  const [passwordtype, setpasswordtype] = useState("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [showForgetPasswordModal, setshowForgetPasswordModal] = useState(false);
+  const [showWrongCredentialsModal, setshowWrongCredentialsModal] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log("SignIn component mounted");
+    console.log("SignIn component mounted successfully!");
+    console.log("API Base URL:", import.meta.env.VITE_API_URL);
   }, []);
 
   const handleSignIn = async () => {
-    setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    // Reset errors
+    setEmailError("");
+    setPasswordError("");
+
+    // Validate email and password
+    let isValid = true;
+
+    if (!email) {
+      setEmailError("Email is required");
+      isValid = false;
+      return;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      setEmailError("Please enter a valid email address");
+      isValid = false;
+      return;
+    }
+
+    if (!password) {
+      setPasswordError("Password is required");
+      isValid = false;
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await apiClient.post("/api/users/login/", {
+        email: email,
+        password: password,
+      });
+
       setLoading(false);
-      alert("Sign in functionality would work here!");
-    }, 1000);
+
+      if (response.ok) {
+        const { deleted, active, id, user, access } = response?.data;
+
+        localStorage.setItem("userid", id);
+
+        // Check if the account is deleted
+        if (deleted === "True") {
+          toast.error("Your account has been blocked by Admin");
+        }
+        // Check if the account is inactive and not deleted
+        else if (active === "False" && deleted === "False") {
+          navigate(`/otpset/${id}`);
+        }
+        // Handle active user
+        else {
+          dispatch(addUser({ access, ...user }));
+          const admin = encryptUserData({ access, ...user }, encryptKey);
+          localStorage.setItem("USER_STRING", JSON.stringify(admin));
+
+          if (user?.profile_completed) {
+            if (user.type === "P") {
+              navigate("/profile");
+            } else if (user.type === "F") {
+              navigate("/employer/dashboard");
+            } else {
+              navigate("/admin/dashboard");
+            }
+          } else {
+            navigate("/create-profile");
+          }
+        }
+      } else {
+        if (
+          response.status === 400 &&
+          response.data?.active === "False" &&
+          response.data?.deleted === "False"
+        ) {
+          navigate(`/otpset/${response.data.id}`);
+        } else if (
+          response.status === 400 &&
+          response.data?.active === "False" &&
+          response.data?.deleted === "True"
+        ) {
+          toast.error("Your account has been blocked by Admin");
+        } else {
+          if (!toast.isActive("invalid-credentials")) {
+            toast.error("Invalid Credentials", {
+              toastId: "invalid-credentials",
+            });
+          }
+        }
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Network error:", error);
+      toast.error("Network error. Please try again.");
+    }
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#000e2f',
-      display: 'flex',
-      flexDirection: 'row'
-    }}>
-      {/* Debug test div */}
+    <Box className="d-flex flex-row w-100" sx={{ height: "100vh" }}>
+      {/* Debug indicator */}
       <div style={{ 
         position: 'fixed', 
-        top: 0, 
-        left: 0, 
-        background: 'red', 
+        top: '10px', 
+        right: '10px', 
+        background: 'green', 
         color: 'white', 
-        padding: '10px', 
+        padding: '5px 10px', 
+        borderRadius: '5px',
+        fontSize: '12px',
         zIndex: 9999 
       }}>
-        SignIn Component is rendering!
+        ✅ SignIn Loaded
       </div>
+
+      <ForgetPasswordModal
+        show={showForgetPasswordModal}
+        onHide={() => setshowForgetPasswordModal(false)}
+      />
+      <WrongCredentialsModal
+        show={showWrongCredentialsModal}
+        onHide={() => setshowWrongCredentialsModal(false)}
+      />
       
-      {/* Main content */}
-      <div style={{
-        flex: 1,
-        padding: '20px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        color: 'white'
-      }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '500px',
-          textAlign: 'center'
-        }}>
-          <h1 style={{ marginBottom: '30px' }}>Sign In</h1>
-          
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            handleSignIn();
-          }}>
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '5px' }}>Email</label>
+      <Box
+        className="w-100 p-5 bg_primary"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundImage: "url('/signatureBG.svg')",
+          backgroundPosition: "center bottom 50px",
+          backgroundRepeat: "no-repeat",
+          height: "100%",
+        }}
+      >
+        <Box
+          sx={{
+            width: {
+              xs: "90%",
+              sm: "80%",
+              md: "80%",
+              lg: "70%",
+            },
+            maxWidth: "500px",
+          }}
+        >
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSignIn();
+            }}
+            className="d-flex flex-column align-items-center gap-3"
+          >
+            <Box className="text-center mt-3 mb-4">
+              <img src="/signUpLogo.svg" alt="Logo" className="img-fluid" />
+            </Box>
+            <Typography className="text-white fw-bold good-times-font fs-4">
+              Sign In
+            </Typography>
+
+            {/* Email input */}
+            <Box className="w-100 d-flex flex-column align-items-start gap-2">
+              <Typography
+                className="text-white fontstylelabel"
+                style={{ fontWeight: 400 }}
+              >
+                Email
+              </Typography>
               <input
                 type="email"
+                className="p-3 rounded-2 auth_input"
+                placeholder="name.surname@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px',
-                  backgroundColor: '#000e2f',
-                  color: 'white',
-                  border: '1px solid white',
-                  borderRadius: '5px'
-                }}
-                placeholder="Enter your email"
               />
-            </div>
-            
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '5px' }}>Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px',
-                  backgroundColor: '#000e2f',
-                  color: 'white',
-                  border: '1px solid white',
-                  borderRadius: '5px'
-                }}
-                placeholder="Enter your password"
-              />
-            </div>
-            
-            <button
+              {emailError && (
+                <Alert severity="error" sx={{ width: "100%" }}>
+                  {emailError}
+                </Alert>
+              )}
+            </Box>
+
+            {/* Password input */}
+            <Box className="w-100 position-relative">
+              <Box className="w-100 d-flex flex-column align-items-start gap-2">
+                <Typography
+                  className="text-white fontstylelabel "
+                  style={{ fontWeight: 400 }}
+                >
+                  Password
+                </Typography>
+                <input
+                  type={passwordtype}
+                  className="p-3 rounded-2 auth_input"
+                  placeholder="Enter Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </Box>
+              {passwordtype === "password" ? (
+                <IoEyeSharp
+                  size={24}
+                  className="position-absolute translate-middle text_gray"
+                  id="togglePassword"
+                  onClick={() => setpasswordtype("text")}
+                  style={{
+                    top: "70%",
+                    right: "10px",
+                    cursor: "pointer",
+                    color: "white",
+                  }}
+                />
+              ) : (
+                <IoMdEyeOff
+                  id="togglePassword"
+                  size={24}
+                  onClick={() => setpasswordtype("password")}
+                  className="position-absolute translate-middle text_gray"
+                  style={{
+                    top: "70%",
+                    right: "10px",
+                    cursor: "pointer",
+                    color: "white",
+                  }}
+                />
+              )}
+            </Box>
+            {passwordError && (
+              <Alert severity="error" sx={{ width: "100%" }}>
+                {passwordError}
+              </Alert>
+            )}
+
+            <Box className="d-flex flex-row align-items-center justify-content-end w-100">
+              <Typography
+                onClick={() => navigate("/forget-email")}
+                className="text_blue"
+                sx={{ fontSize: "12px", cursor: "pointer" }}
+              >
+                Forget Password
+              </Typography>
+            </Box>
+            <Button
               type="submit"
-              style={{
-                width: '100%',
-                padding: '10px',
-                backgroundColor: 'white',
-                color: '#000e2f',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                marginBottom: '20px'
+              onClick={handleSignIn}
+              className="w-100 rounded-2 py-2"
+              sx={{
+                textTransform: "none",
+                color: "black",
+                backgroundColor: "white",
+                "&:hover": {
+                  backgroundColor: "#f8f8f8",
+                },
               }}
             >
               Sign In
-            </button>
-          </form>
-          
-          <p style={{ fontSize: '14px' }}>
-            Don't have an account? 
-            <span 
-              onClick={() => navigate("/sign-up")}
-              style={{ color: '#004fff', cursor: 'pointer', marginLeft: '5px' }}
+            </Button>
+            <Typography
+              className="text-white"
+              sx={{ fontSize: "12px", textAlign: "center" }}
             >
-              Sign up
-            </span>
-          </p>
-        </div>
-      </div>
-      
-      {loading && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 10000
-        }}>
-          <div style={{ color: 'white' }}>Loading...</div>
-        </div>
-      )}
-    </div>
+              Don't have an account?{" "}
+              <Typography
+                onClick={() => navigate("/sign-up")}
+                component={"span"}
+                className="text_blue"
+                sx={{ fontSize: "12px", cursor: "pointer" }}
+              >
+                Sign up
+              </Typography>
+            </Typography>
+          </form>
+        </Box>
+      </Box>
+      <Box sx={{ height: "auto" }} className="w-100 d-md-block d-none p-0">
+        <img
+          src="/signUpDoctor.svg"
+          alt="Doctor"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+      </Box>
+      <Loader loading={loading} />
+    </Box>
   );
 };
 
