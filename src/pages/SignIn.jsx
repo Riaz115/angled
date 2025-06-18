@@ -140,6 +140,22 @@ const SignIn = () => {
         SignIn Component is rendering!
       </div>
       
+      {/* Fallback content for debugging */}
+      <div style={{
+        position: 'fixed',
+        top: '50px',
+        left: '0',
+        background: 'yellow',
+        color: 'black',
+        padding: '10px',
+        zIndex: 9998,
+        fontSize: '14px'
+      }}>
+        <p>React is working!</p>
+        <p>Email: {email}</p>
+        <p>Password: {password ? '***' : 'empty'}</p>
+      </div>
+      
       <ForgetPasswordModal
         show={showForgetPasswordModal}
         onHide={() => setshowForgetPasswordModal(false)}

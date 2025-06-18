@@ -11,7 +11,7 @@ export default defineConfig({
     cors: true,
     port: 3001,
   },
-  base: '/',
+  base: './',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -20,6 +20,7 @@ export default defineConfig({
   build: {
     outDir: "dist",
     chunkSizeWarningLimit: 2000,
+    assetsDir: 'assets',
     rollupOptions: {
       input: {
         main: "index.html",
