@@ -100,145 +100,60 @@ class ErrorBoundary extends React.Component {
 }
 
 function App() {
-  const navigate = useNavigate();
-  const user = useSelector(selectUser);
-  const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Add debugging to check if App component is rendering
-  useEffect(() => {
-    console.log("App component mounted");
-    console.log("Current user:", user);
-    console.log("Environment:", import.meta.env.MODE);
-    setIsLoading(false);
-  }, [user]);
-
-  useEffect(() => {
-    const initializeAuth = () => {
-      try {
-        const storedData = localStorage.getItem("USER_STRING");
-        if (storedData) {
-          const data = JSON.parse(storedData);
-          const adminData = decryptUserData(data, encryptKey);
-          setAuthToken(adminData?.access);
-          dispatch(addUser(adminData));
-        }
-      } catch (error) {
-        console.error("Error initializing auth:", error);
-        localStorage.removeItem("USER_STRING");
-        navigate("/");
-      }
-    };
-
-    initializeAuth();
-  }, [dispatch, navigate]);
-
-  const ProtectedRoute = ({ children, allowedTypes }) => {
-    if (!user) {
-      return <Navigate to="/" replace />;
-    }
-
-    if (allowedTypes && !allowedTypes.includes(user.type)) {
-      return <Navigate to="/" replace />;
-    }
-
-    return children;
-  };
-
-  if (isLoading) {
-    return (
-      <div style={{
-        padding: '20px',
-        backgroundColor: '#000e2f',
-        color: 'white',
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        Loading...
-      </div>
-    );
-  }
+  console.log("App component is rendering!");
 
   return (
-    <ErrorBoundary>
-      <Routes>
-        <Route path="/" element={<SignIn />} />
-        <Route path="/sign-up" element={<SignUp />} />
-        <Route path="/forget-email" element={<ForgetEmail />} />
-        <Route path="/changepassword" element={<ChangePassword />} />
-        <Route path="/otpset/:id" element={<OtpSet />} />
-        
-        <Route
-          path="/create-profile"
-          element={
-            <ProtectedRoute>
-              <CreateProfile />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Professional Routes */}
-        <Route
-          element={
-            <ProtectedRoute allowedTypes={["P"]}>
-              <Navbar />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/find-employee/job" element={<EmployeeJob />} />
-          <Route path="/find-employee/job/detail/:id" element={<EmployeeeJobDetail />} />
-          <Route path="/employee/job/" element={<EmployeeJobs />} />
-          <Route path="/job-details/:id" element={<JobDetails />} />
-        </Route>
-
-        {/* Employer Routes */}
-        <Route
-          element={
-            <ProtectedRoute allowedTypes={["F"]}>
-              <Dashboardnav type="employer" />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/employer/dashboard" element={<EmployerDashboard />} />
-          <Route path="/employer/professional/:id" element={<EmployerProfessionalDetail />} />
-          <Route path="/employer/jobs" element={<EmployerJobs />} />
-          <Route path="/employer/jobs/:id" element={<EmployerJobDetail />} />
-          <Route path="/employer/jobs/postjob" element={<EmployerPostJob />} />
-          <Route path="/employer/jobs/editjob" element={<EmployerEditJob />} />
-          <Route path="/employer/applicants" element={<EmployerApplicants />} />
-          <Route path="/employer/applicants/:id" element={<EmployerApplicantDetail />} />
-          <Route path="/employer/messages" element={<EmployerMessages />} />
-          <Route path="/employer/messages/:id" element={<EmployerMessageDetail />} />
-          <Route path="/employer/settings" element={<EmployerSetting />} />
-        </Route>
-
-        {/* Admin Routes */}
-        <Route
-          element={
-            <ProtectedRoute allowedTypes={["A"]}>
-              <Dashboardnav type="admin" />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/healthcareprofesionals" element={<AdminHealthCareProfesionals />} />
-          <Route path="/admin/healthcareprofesionals/:id" element={<AdminHealthCareProfesionalDetail />} />
-          <Route path="/admin/employer" element={<AdminEmployers />} />
-          <Route path="/admin/employer/:id" element={<AdminEmployerDetail />} />
-          <Route path="/admin/jobs" element={<AdminJobs />} />
-          <Route path="/admin/jobs/:id" element={<AdminJobDetail />} />
-          <Route path="/admin/messages" element={<AdminMessages />} />
-          <Route path="/admin/messages/:id" element={<AdminMessageDetail />} />
-          <Route path="/admin/settings" element={<AdminSettings />} />
-        </Route>
-
-        {/* Catch all route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </ErrorBoundary>
+    <div style={{
+      backgroundColor: '#000e2f',
+      color: 'white',
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: '20px'
+    }}>
+      <h1>🎉 App Component is Working!</h1>
+      <p>If you can see this, the App component is rendering properly.</p>
+      
+      <div style={{
+        background: 'red',
+        color: 'white',
+        padding: '10px',
+        margin: '10px',
+        borderRadius: '5px'
+      }}>
+        This should be a red box
+      </div>
+      
+      <button 
+        onClick={() => alert('App component is working!')}
+        style={{
+          padding: '10px 20px',
+          backgroundColor: 'white',
+          color: '#000e2f',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          marginTop: '20px'
+        }}
+      >
+        Test App Button
+      </button>
+      
+      <div style={{
+        position: 'fixed',
+        top: '10px',
+        right: '10px',
+        background: 'green',
+        color: 'white',
+        padding: '5px 10px',
+        borderRadius: '5px',
+        fontSize: '12px'
+      }}>
+        ✅ App Loaded
+      </div>
+    </div>
   );
 }
 
